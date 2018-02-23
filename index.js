@@ -20,14 +20,26 @@ export default class TextInputMask extends Component {
     if (this.props.maskDefaultValue &&
         this.props.mask &&
         this.props.value) {
-      mask(this.props.mask, '' + this.props.value, text =>
-        this.input.setNativeProps({ text }),
-      )
+      mask(this.props.mask, '' + this.props.value, text => {
+        if(!!this.input) {
+          return this.input.setNativeProps({ text });
+        }
+      })
     }
 
     if (this.props.mask && !this.masked) {
       this.masked = true
       NativeModules.RNTextInputMask.setMask(findNodeHandle(this.input), this.props.mask)
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.value != nextProps.value) {
+      mask(this.props.mask, '' + nextProps.value, text => {
+        if(!!this.input) {
+          this.input.setNativeProps({ text })
+        }
+      });
     }
   }
 
