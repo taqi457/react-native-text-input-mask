@@ -7,9 +7,7 @@ import {
 } from 'react-native'
 
 const mask = NativeModules.RNTextInputMask.mask
-const unmask = NativeModules.RNTextInputMask.unmask
-const setMask = NativeModules.RNTextInputMask.setMask
-export { mask, unmask, setMask }
+export { mask }
 
 export default class TextInputMask extends Component {
   static defaultProps = {
@@ -31,33 +29,22 @@ export default class TextInputMask extends Component {
 
     if (this.props.mask && !this.masked) {
       this.masked = true
-      setMask(findNodeHandle(this.input), this.props.mask)
+      NativeModules.RNTextInputMask.setMask(findNodeHandle(this.input), this.props.mask)
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.value != nextProps.value) {
-      mask(this.props.mask, '' + nextProps.value, text =>
+      mask(this.props.mask, '' + nextProps.value, text => {
         this.input.setNativeProps({ text })
-      );
+      });
     }
   }
 
   render() {
     return (<TextInput
+      ref={ref => (this.input = ref)}
       {...this.props}
-      value={undefined}
-      ref={ref => {
-        this.input = ref
-        if (typeof this.props.refInput === 'function') {
-          this.props.refInput(ref)
-        }
-      }}
-      onChangeText={masked => {
-        const _unmasked = unmask(this.props.mask, masked, unmasked => {
-          this.props.onChangeText && this.props.onChangeText(masked, unmasked)
-        })
-      }}
     />);
   }
 }
